@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Chat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Nexus</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="blog.html">Blog</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="chat.html">Chat</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <span id="navUsername">User</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="profile.html">Profile</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item text-danger" href="#" onclick="logout()">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Chat Container -->
+    <!-- Updated Height: 100vh - 100px (Shorter page) -->
+    <div class="d-flex w-100" style="height: calc(100vh - 100px); background-color: #343541;">
+        <!-- Sidebar: User List -->
+        <!-- Updated Width: 320px -->
+        <div class="chat-sidebar d-flex flex-column border-end" style="width: 340px; min-width: 340px;">
+            <div class="p-3 border-bottom border-secondary">
+                <h5 class="mb-3 fw-bold small text-uppercase spacing-wide text-white">Contacts</h5>
+                <div class="position-relative">
+                    <input type="text" class="form-control form-control-sm border-0 text-white rounded"
+                        style="background-color: #40414f; color: #ffffff;" placeholder="Search...">
+                </div>
+            </div>
+
+            <div class="flex-grow-1 overflow-auto" id="userList">
+                <!-- Users injected here -->
+                <div class="text-center mt-5">
+                    <div class="spinner-border text-light spinner-border-sm" role="status"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="chat-main flex-grow-1 d-flex flex-column bg-white">
+            <!-- Chat Header -->
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white"
+                style="height: 60px;">
+                <div class="d-flex align-items-center">
+                    <div id="chatHeaderAvatar" class="me-2 d-none"></div>
+                    <div>
+                        <h6 id="chatHeader" class="m-0 fw-bold text-dark">Select a conversation</h6>
+                        <span id="typingIndicator" class="text-primary small fst-italic"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div class="chat-messages flex-grow-1 p-4" id="messagesArea">
+                <div
+                    class="h-100 d-flex flex-column justify-content-center align-items-center text-center text-muted opacity-50">
+                    <div class="mb-3">
+                        <span style="font-size: 40px;">WELCOME TO NEXUS CHAT</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="chat-input p-4 bg-white">
+                <div class="input-group shadow-sm">
+                    <input type="text" id="messageInput" class="form-control border-0 py-3 px-4 shadow-none"
+                        placeholder="Send a message..." disabled>
+                    <button class="btn btn-link text-muted pe-3" id="sendBtn" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                            class="bi bi-send" viewBox="0 0 16 16">
+                            <path
+                                d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="text-center mt-2">
+                    <small class="text-muted" style="font-size: 10px;">Nexus Chat connect to people.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <script>
+        const token = localStorage.getItem('token');
+        const currentUser = JSON.parse(localStorage.getItem('user'));
+
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        // Update Navbar Username
+        if (currentUser) {
+            document.getElementById('navUsername').innerText = currentUser.username;
+        }
+
+        // Initialize Socket.IO
+        const socket = io();
+
+        // Join with User ID
+        socket.emit('join', currentUser._id);
+
+        let selectedUserId = null;
+        let selectedUsername = null;
+        let typingTimeout = null;
+
+        // Fetch Users
+        async function fetchUsers() {
+            try {
+                const res = await fetch('/api/auth/users', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const users = await res.json();
+
+                const userList = document.getElementById('userList');
+                userList.innerHTML = '';
+
+                if (users.length === 0) {
+                    // Update No Contacts Found styling
+                    userList.innerHTML = '<div class="p-3 text-center small text-white">No contacts found.</div>';
+                    return;
+                }
+
+                users.forEach((user, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'user-item p-3 d-flex align-items-center text-white';
+                    div.style.cursor = 'pointer';
+                    div.id = `user-${user._id}`;
+
+                    div.innerHTML = `
+                        <div class="me-3">
+                            <div class="bg-secondary rounded-sm text-white d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; border-radius: 4px;">
+                                ${user.username.charAt(0).toUpperCase()}
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 overflow-hidden">
+                            <h6 class="mb-0 small text-truncate" style="color: #ececf1;">${user.username}</h6>
+                        </div>
+                    `;
+
+                    div.onclick = () => selectUser(user._id, user.username);
+                    userList.appendChild(div);
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        // Select User
+        async function selectUser(userId, username) {
+            selectedUserId = userId;
+            selectedUsername = username;
+
+            // Visual update
+            const items = document.querySelectorAll('.user-item');
+            items.forEach(el => {
+                el.classList.remove('active');
+                el.style.backgroundColor = 'transparent';
+            });
+            const selectedItem = document.getElementById(`user-${userId}`);
+            if (selectedItem) {
+                selectedItem.classList.add('active');
+                selectedItem.style.backgroundColor = '#343541';
+            }
+
+            document.getElementById('chatHeader').innerText = username;
+            document.getElementById('messageInput').disabled = false;
+            document.getElementById('sendBtn').disabled = false;
+            document.getElementById('messagesArea').innerHTML = '';
+
+            fetchMessages(userId);
+        }
+
+        // Fetch Messages
+        async function fetchMessages(userId) {
+            try {
+                const res = await fetch(`/api/messages/${userId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const messages = await res.json();
+
+                const messagesArea = document.getElementById('messagesArea');
+                messagesArea.innerHTML = '';
+
+                messages.forEach(msg => {
+                    appendMessage(msg, msg.sender === currentUser._id ? 'sent' : 'received');
+                });
+
+                scrollToBottom();
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        // Append Message to UI
+        function appendMessage(msg, type) {
+            const div = document.createElement('div');
+            // Use specific classes for Message styling
+            div.className = `message ${type} d-flex align-items-start mb-4`;
+            div.innerHTML = msg.content;
+            document.getElementById('messagesArea').appendChild(div);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const area = document.getElementById('messagesArea');
+            area.scrollTop = area.scrollHeight;
+        }
+
+        // Send Message
+        document.getElementById('sendBtn').addEventListener('click', sendMessage);
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Typing Indicator Logic
+        document.getElementById('messageInput').addEventListener('input', () => {
+            if (selectedUserId) {
+                socket.emit('typing', { recipientId: selectedUserId, isTyping: true });
+
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(() => {
+                    socket.emit('typing', { recipientId: selectedUserId, isTyping: false });
+                }, 2000);
+            }
+        });
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const content = input.value.trim();
+
+            if (!content || !selectedUserId) return;
+
+            // Emit to Socket
+            socket.emit('sendMessage', {
+                senderId: currentUser._id,
+                recipientId: selectedUserId,
+                content
+            });
+
+            // Optimistically append to UI
+            appendMessage({ content }, 'sent');
+
+            input.value = '';
+        }
+
+        // Socket Listeners
+        socket.on('receiveMessage', (msg) => {
+            if (msg.sender === selectedUserId) {
+                appendMessage(msg, 'received');
+            }
+        });
+
+        socket.on('userTyping', (data) => {
+            if (data.senderId === selectedUserId) {
+                const indicator = document.getElementById('typingIndicator');
+                if (data.isTyping) {
+                    indicator.innerText = 'typing...';
+                } else {
+                    indicator.innerText = '';
+                }
+            }
+        });
+
+        // Initial Fetch
+        fetchUsers();
+
+        // Auto-refresh user list every 5 seconds to catch new users
+        setInterval(fetchUsers, 5000);
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>

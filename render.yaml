@@ -1,0 +1,19 @@
+services:
+  # Web Service for Node.js Backend
+  - type: web
+    name: nexus-app
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server/server.js
+    envVars:
+      - key: MONGO_URI
+        sync: false # User must provide this in dashboard
+      - key: JWT_SECRET
+        generateValue: true # Generate a random secret
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
