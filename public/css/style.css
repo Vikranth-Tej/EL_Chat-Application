@@ -2,26 +2,44 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Google+Sans:wght@400;500;700&display=swap');
 
 :root {
-    --google-blue: #1a73e8;
-    --google-blue-hover: #1765cc;
-    --google-red: #ea4335;
-    --google-green: #34a853;
-    --google-yellow: #fbbc04;
+    /* Nexus Brand Palette - Preserved */
+    --nexus-blue: #1a73e8;
+    --nexus-violet: #8e24aa;
+    --nexus-red: #ea4335;
+    --nexus-green: #34a853;
+    --nexus-yellow: #fbbc04;
+    --nexus-orange: #f57c00;
+    --nexus-olive: #827717;
+    --nexus-grey: #607d8b;
 
-    /* Extended Palette */
-    --sys-violet: #8e24aa;
-    --sys-grey: #607d8b;
-    --sys-olive: #827717;
-    --sys-brown: #795548;
-    --sys-cream: #ffe0b2;
-    --sys-maroon: #880e4f;
-    --sys-orange: #f57c00;
-    --sys-black: #212121;
+    /* Grayscale / Silver Palette for UI */
+    --google-blue: #757575;
+    /* Main Grey */
+    --google-blue-hover: #424242;
+    /* Darker Grey */
+    --google-red: #212121;
+    /* Almost Black */
+    --google-green: #616161;
+    /* Dark Grey */
+    --google-yellow: #bdbdbd;
+    /* Silver */
 
-    --google-blue-light: #e8f0fe;
-    --google-red-light: #fce8e6;
-    --google-green-light: #e6f4ea;
-    --google-yellow-light: #fef7e0;
+    /* Extended Palette - Grayscale Variations */
+    --sys-violet: #5c5c5c;
+    --sys-grey: #9e9e9e;
+    /* Light Grey */
+    --sys-olive: #4a4a4a;
+    --sys-brown: #3b3b3b;
+    --sys-cream: #e0e0e0;
+    /* Very Light Silver */
+    --sys-maroon: #1a1a1a;
+    --sys-orange: #808080;
+    --sys-black: #000000;
+
+    --google-blue-light: #f5f5f5;
+    --google-red-light: #eeeeee;
+    --google-green-light: #f0f0f0;
+    --google-yellow-light: #fafafa;
 
     --google-gray-50: #f8f9fa;
     --google-gray-100: #f1f3f4;
@@ -70,10 +88,8 @@ a:hover {
 .navbar {
     background-color: #ffffff !important;
     /* Multi-color bottom border */
-    border-bottom: 4px solid transparent;
-    border-image: linear-gradient(to right,
-            var(--google-blue), var(--sys-violet), var(--google-red), var(--sys-orange),
-            var(--google-yellow), var(--sys-olive), var(--google-green), var(--sys-grey)) 1;
+    /* Black bottom border */
+    border-bottom: 4px solid black;
     padding: 12px 24px;
     box-shadow: none !important;
 }
@@ -86,7 +102,7 @@ a:hover {
     /* color: var(--google-gray-600) !important; Removed */
     letter-spacing: -0.5px;
     padding-top: 4px;
-    background: linear-gradient(90deg, var(--google-blue), var(--sys-violet), var(--sys-grey));
+    background: linear-gradient(90deg, var(--nexus-blue), var(--nexus-violet), var(--nexus-grey));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -94,7 +110,7 @@ a:hover {
 
 /* Utility for Nexus Gradient Text */
 .text-gradient-nexus {
-    background: linear-gradient(90deg, var(--google-blue), var(--sys-violet), var(--sys-grey));
+    background: linear-gradient(90deg, var(--nexus-blue), var(--nexus-violet), var(--nexus-grey));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -202,7 +218,7 @@ a:hover {
 .btn-outline-danger:hover {
     background-color: var(--google-red-light);
     /* border-color: var(--google-gray-300); Remove override */
-    color: #b31412;
+    color: #000000;
 }
 
 .btn-outline-success {
@@ -213,7 +229,7 @@ a:hover {
 
 .btn-outline-success:hover {
     background-color: var(--google-green-light);
-    color: #137333;
+    color: #000000;
 }
 
 .btn-outline-warning {
@@ -224,7 +240,7 @@ a:hover {
 
 .btn-outline-warning:hover {
     background-color: var(--google-yellow-light);
-    color: #f09b00;
+    color: #000000;
 }
 
 /* Inputs */
@@ -434,7 +450,7 @@ a:hover {
 
 .message.sent {
     align-self: flex-end;
-    background-color: #1a73e8;
+    background-color: var(--google-blue);
     /* Google Blue for 'Me' */
     color: white;
     border-bottom-right-radius: 2px;
@@ -542,7 +558,7 @@ a:hover {
 }
 
 .btn-success:hover {
-    background-color: #137333;
+    background-color: #424242;
     /* Darker green */
     color: white;
 }
@@ -553,7 +569,7 @@ a:hover {
 }
 
 .btn-warning:hover {
-    background-color: #f09b00;
+    background-color: #9e9e9e;
     /* Darker yellow */
     color: black;
 }
@@ -910,8 +926,8 @@ body.chat-page {
 }
 
 .wa-icon-btn:hover {
-    color: var(--google-blue);
-    background-color: var(--google-gray-100);
+    color: var(--google-gray-800);
+    background-color: var(--google-gray-200);
 }
 
 /* Custom Scrollbar */
@@ -947,12 +963,84 @@ body.chat-page {
     width: 40px;
     height: 40px;
     font-size: 16px;
-    background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
-    /* Google Blue to Green */
+    background: linear-gradient(135deg, #757575 0%, #bdbdbd 100%);
+    /* Grey to Silver */
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     font-weight: bold;
+}
+
+/* Bootstrap Color Overrides for Grayscale Theme */
+.text-primary {
+    color: var(--google-blue) !important;
+}
+
+.text-danger {
+    color: var(--google-red) !important;
+}
+
+.text-success {
+    color: var(--google-green) !important;
+}
+
+.text-warning {
+    color: var(--google-yellow) !important;
+}
+
+.text-info {
+    color: var(--sys-grey) !important;
+}
+
+.bg-primary {
+    background-color: var(--google-blue) !important;
+}
+
+.bg-danger {
+    background-color: var(--google-red) !important;
+}
+
+.bg-success {
+    background-color: var(--google-green) !important;
+}
+
+.bg-warning {
+    background-color: var(--google-yellow) !important;
+}
+
+.bg-info {
+    background-color: var(--sys-grey) !important;
+}
+
+/* Bootstrap Alert Overrides */
+.alert-primary {
+    color: #fff;
+    background-color: var(--google-blue);
+    border-color: var(--google-blue);
+}
+
+.alert-danger {
+    color: #fff;
+    background-color: var(--google-red);
+    border-color: var(--google-red);
+}
+
+.alert-success {
+    color: #fff;
+    background-color: var(--google-green);
+    border-color: var(--google-green);
+}
+
+.alert-warning {
+    color: #000;
+    background-color: var(--google-yellow);
+    border-color: var(--google-yellow);
+}
+
+.alert-info {
+    color: #fff;
+    background-color: var(--sys-grey);
+    border-color: var(--sys-grey);
 }
